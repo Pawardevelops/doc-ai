@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { read, utils } from "xlsx";
 import ReactMarkdown from "react-markdown";
+import { FileUpload } from "./components/ui/file-upload";
 
 export default function Home() {
   const [fileData, setFileData] = useState([]);
@@ -9,36 +10,41 @@ export default function Home() {
   const [chat, setChat] = useState([]);
   const [error, setError] = useState("");
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
+  const handleFileChange = (newFiles) => {
     const newFileData = [];
-
-    files.forEach((file) => {
+    newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         let parsedData;
+
         if (file.name.endsWith(".xlsx")) {
+          // Parse XLSX file
           const workbook = read(event.target.result, { type: "binary" });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          parsedData = utils.sheet_to_json(worksheet);
-        } else {
+          parsedData = utils.sheet_to_json(worksheet); // Convert worksheet to JSON
+        } else if (file.name.endsWith(".csv")) {
+          // Parse CSV file
           parsedData = event.target.result
             .split("\n")
-            .map((line) => line.split(",")); 
+            .map((line) => line.split(",")); // Split CSV lines
+        } else {
+          setError("Unsupported file format. Only .csv and .xlsx are allowed.");
+          return;
         }
 
         newFileData.push({ fileName: file.name, content: parsedData });
 
-        if (newFileData.length === files.length) {
-          setFileData(newFileData);
-          setChat([]); 
+        // If all files are processed, update state
+        if (newFileData.length === newFiles.length) {
+          setFileData((prevData) => [...prevData, ...newFileData]);
+          setChat([]); // Clear chat when new files are uploaded
         }
       };
 
       if (file.name.endsWith(".xlsx")) {
         reader.readAsBinaryString(file);
-      } else {
+      } else if (file.name.endsWith(".csv")) {
         reader.readAsText(file);
       }
     });
@@ -80,7 +86,7 @@ export default function Home() {
         { type: "ai", message: data.response },
       ]);
 
-      setUserQuery(""); 
+      setUserQuery(""); // Clear the input
     } catch (error) {
       console.error("Error:", error);
       setError(error.message);
@@ -93,16 +99,7 @@ export default function Home() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div style={{ marginBottom: "20px" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>
-          Upload Files:
-        </label>
-        <input
-          type="file"
-          accept=".csv, .xlsx"
-          multiple
-          onChange={handleFileChange}
-          style={{ marginBottom: "10px" }}
-        />
+        <FileUpload onChange={(files) => handleFileChange(files)} />
         <p style={{ fontStyle: "italic", fontSize: "14px" }}>
           {fileData.length > 0
             ? `${fileData.length} file(s) uploaded successfully.`
@@ -130,14 +127,13 @@ export default function Home() {
               >
                 {Array.isArray(file.content)
                   ? file.content
-                      .map(
-                        (row) =>
-                          Array.isArray(row) // Check if the row is an array
-                            ? row.join(", ") // Join array elements with a comma
-                            : Object.values(row).join(", ") // Convert object values to a string
+                      .map((row) =>
+                        Array.isArray(row)
+                          ? row.join(", ")
+                          : Object.values(row).join(", ")
                       )
-                      .join("\n") // Join rows with a newline
-                  : JSON.stringify(file.content, null, 2)}{" "}
+                      .join("\n")
+                  : JSON.stringify(file.content, null, 2)}
               </pre>
             </div>
           ))}
