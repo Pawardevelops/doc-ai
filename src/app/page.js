@@ -1,18 +1,23 @@
-"use client";
-import { useState } from "react";
+"use client"
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { PlaceholdersAndVanishInput } from "./components/ui/placeholders-and-vanish-input";
 import { read, utils } from "xlsx";
 import ReactMarkdown from "react-markdown";
 import { FileUpload } from "./components/ui/file-upload";
 import { FlipWords } from "./components/ui/flip-words";
+import { TextGenerateEffect } from "./components/ui/text-generate-effect";
 
 export default function Home() {
   const [fileData, setFileData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Track the current page for pagination
+  const [currentPage, setCurrentPage] = useState(1);
   const [userQuery, setUserQuery] = useState("");
   const [chat, setChat] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // New state for loading
 
-  const recordsPerPage = 10; // Set the number of records per page
+  const recordsPerPage = 10;
 
   const handleFileChange = (newFiles) => {
     const newFileData = [];
@@ -22,15 +27,13 @@ export default function Home() {
         let parsedData;
 
         if (file.name.endsWith(".xlsx")) {
-          // Parse XLSX file
           const workbook = read(event.target.result, { type: "binary" });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          parsedData = utils.sheet_to_json(worksheet); // Convert worksheet to JSON
+          parsedData = utils.sheet_to_json(worksheet);
         } else if (file.name.endsWith(".csv")) {
-          // Parse CSV file
           const lines = event.target.result.split("\n");
-          const headers = lines[0].split(","); // Assume the first line is the header
+          const headers = lines[0].split(",");
           parsedData = lines.slice(1).map((line) => {
             const values = line.split(",");
             return headers.reduce((acc, header, index) => {
@@ -45,11 +48,10 @@ export default function Home() {
 
         newFileData.push({ fileName: file.name, content: parsedData });
 
-        // If all files are processed, update state
         if (newFileData.length === newFiles.length) {
           setFileData((prevData) => [...prevData, ...newFileData]);
-          setChat([]); // Clear chat when new files are uploaded
-          setCurrentPage(1); // Reset to the first page
+          setChat([]);
+          setCurrentPage(1);
         }
       };
 
@@ -65,10 +67,17 @@ export default function Home() {
     event.preventDefault();
     setError("");
 
+    if (!userQuery.trim()) return; // Prevent empty queries
     if (fileData.length === 0) {
       setError("Please upload at least one file first.");
       return;
     }
+
+    const userMessage = { type: "user", message: userQuery };
+
+    setChat((prevChat) => [...prevChat, userMessage]); // Add user query instantly
+    setUserQuery(""); // Clear the input
+    setLoading(true); // Set loading state
 
     try {
       const response = await fetch("/api/chat", {
@@ -89,30 +98,28 @@ export default function Home() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch response.");
       }
-      const data = await response.json();
 
+      const data = await response.json();
       setChat((prevChat) => [
         ...prevChat,
-        { type: "user", message: userQuery },
         { type: "ai", message: data.response },
       ]);
-
-      setUserQuery(""); // Clear the input
     } catch (error) {
       console.error("Error:", error);
       setError(error.message);
+    } finally {
+      setLoading(false); // Remove loading state
     }
   };
 
   const renderTable = (data) => {
     if (data.length === 0) return <p>No data available</p>;
 
-    // Pagination logic
     const startIndex = (currentPage - 1) * recordsPerPage;
     const endIndex = startIndex + recordsPerPage;
     const paginatedData = data.slice(startIndex, endIndex);
 
-    const headers = Object.keys(data[0]); // Extract headers from the first record
+    const headers = Object.keys(data[0]);
 
     return (
       <div>
@@ -148,8 +155,6 @@ export default function Home() {
             ))}
           </tbody>
         </table>
-
-        {/* Pagination controls */}
         <div
           style={{
             marginTop: "10px",
@@ -196,27 +201,28 @@ export default function Home() {
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <div
-      style={{
-        textAlign: "center",
+        style={{
+          textAlign: "center",
           fontSize: "3rem",
           fontWeight: "bold",
           marginBottom: "20px",
           wordWrap: "break-word",
           color: "#007ACC",
-      }}
+        }}
       >
-        Chat With<FlipWords words={["XLSX","CSV"]} />
+        Chat With <FlipWords words={["XLSX", "CSV"]} />
       </div>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div style={{ marginBottom: "20px" }}>
+      <div>
+<div style={{ marginBottom: "20px" }}>
         <FileUpload onChange={(files) => handleFileChange(files)} />
         <p style={{ fontStyle: "italic", fontSize: "14px" }}>
           {fileData.length > 0
             ? `${fileData.length} file(s) uploaded successfully.`
             : "No files uploaded yet."}
         </p>
-
         <div
           style={{
             maxHeight: "400px",
@@ -262,42 +268,28 @@ export default function Home() {
               }}
             >
               {message.type === "ai" ? (
-                <ReactMarkdown>{message.message}</ReactMarkdown>
+                loading ? (
+                  <p>Loading...</p>
+                ) : (
+                  
+                  <TextGenerateEffect words={message.message} />
+                )
               ) : (
                 <p>{message.message}</p>
               )}
             </div>
           </div>
         ))}
+        <PlaceholdersAndVanishInput
+        placeholders={["Ask a question...", "Summarize the data...", "Find insights..."]}
+        onChange={(e) => setUserQuery(e.target.value)}
+        onSubmit={handleSubmit}
+      />
+      </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={userQuery}
-          onChange={(e) => setUserQuery(e.target.value)}
-          placeholder="Ask a question about the files"
-          style={{
-            width: "calc(100% - 110px)",
-            padding: "8px",
-            border: "1px solid #ddd",
-            borderRadius: "4px",
-            marginRight: "10px",
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: "10px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
-          Send
-        </button>
-      </form>
+      
+      
     </div>
   );
 }
