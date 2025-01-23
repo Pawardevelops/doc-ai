@@ -73,7 +73,7 @@ export default function Home() {
           />
           <input
             type="file"
-            accept=".csv, .xlsx"
+            accept=".csv, .xlsx, .pdf, .docx"
             onChange={handleFileChange}
             style={{ marginTop: "10px" }}
           />
