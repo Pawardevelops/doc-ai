@@ -3,12 +3,16 @@ import { useState } from "react";
 import { read, utils } from "xlsx";
 import ReactMarkdown from "react-markdown";
 import { FileUpload } from "./components/ui/file-upload";
+import { FlipWords } from "./components/ui/flip-words";
 
 export default function Home() {
   const [fileData, setFileData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Track the current page for pagination
   const [userQuery, setUserQuery] = useState("");
   const [chat, setChat] = useState([]);
   const [error, setError] = useState("");
+
+  const recordsPerPage = 10; // Set the number of records per page
 
   const handleFileChange = (newFiles) => {
     const newFileData = [];
@@ -25,9 +29,15 @@ export default function Home() {
           parsedData = utils.sheet_to_json(worksheet); // Convert worksheet to JSON
         } else if (file.name.endsWith(".csv")) {
           // Parse CSV file
-          parsedData = event.target.result
-            .split("\n")
-            .map((line) => line.split(",")); // Split CSV lines
+          const lines = event.target.result.split("\n");
+          const headers = lines[0].split(","); // Assume the first line is the header
+          parsedData = lines.slice(1).map((line) => {
+            const values = line.split(",");
+            return headers.reduce((acc, header, index) => {
+              acc[header] = values[index];
+              return acc;
+            }, {});
+          });
         } else {
           setError("Unsupported file format. Only .csv and .xlsx are allowed.");
           return;
@@ -39,6 +49,7 @@ export default function Home() {
         if (newFileData.length === newFiles.length) {
           setFileData((prevData) => [...prevData, ...newFileData]);
           setChat([]); // Clear chat when new files are uploaded
+          setCurrentPage(1); // Reset to the first page
         }
       };
 
@@ -93,9 +104,109 @@ export default function Home() {
     }
   };
 
+  const renderTable = (data) => {
+    if (data.length === 0) return <p>No data available</p>;
+
+    // Pagination logic
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const paginatedData = data.slice(startIndex, endIndex);
+
+    const headers = Object.keys(data[0]); // Extract headers from the first record
+
+    return (
+      <div>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              {headers.map((header, index) => (
+                <th
+                  key={index}
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    backgroundColor: "#f4f4f4",
+                  }}
+                >
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {headers.map((header, cellIndex) => (
+                  <td
+                    key={cellIndex}
+                    style={{ border: "1px solid #ddd", padding: "8px" }}
+                  >
+                    {row[header]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Pagination controls */}
+        <div
+          style={{
+            marginTop: "10px",
+            display: "flex",
+            justifyContent: "center",
+            gap: "10px",
+          }}
+        >
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            style={{
+              padding: "5px 10px",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            }}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {Math.ceil(data.length / recordsPerPage)}
+          </span>
+          <button
+            disabled={currentPage === Math.ceil(data.length / recordsPerPage)}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            style={{
+              padding: "5px 10px",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              cursor:
+                currentPage === Math.ceil(data.length / recordsPerPage)
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h1>Chat with Data Files</h1>
+      <div
+      style={{
+        textAlign: "center",
+          fontSize: "3rem",
+          fontWeight: "bold",
+          marginBottom: "20px",
+          wordWrap: "break-word",
+          color: "#007ACC",
+      }}
+      >
+        Chat With<FlipWords words={["XLSX","CSV"]} />
+      </div>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div style={{ marginBottom: "20px" }}>
@@ -108,7 +219,7 @@ export default function Home() {
 
         <div
           style={{
-            maxHeight: "200px",
+            maxHeight: "400px",
             overflowY: "auto",
             border: "1px solid #ddd",
             padding: "10px",
@@ -117,24 +228,7 @@ export default function Home() {
           {fileData.map((file, index) => (
             <div key={index} style={{ marginBottom: "10px" }}>
               <h4 style={{ margin: "5px 0" }}>{file.fileName}</h4>
-              <pre
-                style={{
-                  backgroundColor: "#f9f9f9",
-                  padding: "10px",
-                  borderRadius: "4px",
-                  overflowX: "auto",
-                }}
-              >
-                {Array.isArray(file.content)
-                  ? file.content
-                      .map((row) =>
-                        Array.isArray(row)
-                          ? row.join(", ")
-                          : Object.values(row).join(", ")
-                      )
-                      .join("\n")
-                  : JSON.stringify(file.content, null, 2)}
-              </pre>
+              {renderTable(file.content)}
             </div>
           ))}
         </div>
