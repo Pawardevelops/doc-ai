@@ -82,17 +82,27 @@ Navigate to `http://localhost:3000` in your browser to see the app.
 ## Folder Structure
 
 ```
-├── public/                  # Static files
+├── public/                  # Static files (e.g., images, icons, and other static assets)
+│   ├── images/              # Optional: Store images, videos, or other assets
+│   └── favicon.ico          # Favicon for the app
 ├── src/
 │   ├── app/
 │   │   ├── components/      # Reusable UI components
-│   │   │   ├── ui/          # UI-specific components (FileUpload, FileContent, etc.)
-│   │   ├── api/             # Backend API routes (e.g., /api/chat)
-│   │   └── page.js          # Main page entry
-│   ├── styles/              # Tailwind and global CSS
-├── .env.local               # Environment variables
+│   │   │   └── ui/      # Shared components (optional: header, footer, etc.)
+│   │   ├── api/             # Backend API routes
+│   │   │   ├── chat/        # API endpoint for chat
+│   │   │   │   └── route.js # Logic for handling /api/chat requests
+│   │   └── page.js          # Main page entry point (Home component)
+│   ├── lib/                 # Optional: Helper libraries or utility functions
+├── .env.local               # Environment variables (e.g., API keys, secret tokens)
 ├── package.json             # Project dependencies and scripts
-└── README.md                # Project documentation
+├── tailwind.config.js       # Tailwind CSS configuration
+├── postcss.config.js        # PostCSS configuration
+├── README.md                # Project documentation
+├── next.config.js           # Next.js configuration
+├── jsconfig.json            # JavaScript configuration (e.g., path aliases)
+└── yarn.lock / package-lock.json # Dependency lockfile
+
 ```
 
 ---
@@ -126,7 +136,7 @@ Navigate to `http://localhost:3000` in your browser to see the app.
 ![Data Pagination](/public/images/content.png)
 
 ### Page
-![Data Pagination](/public/images/page.png)
+![Page](/public/images/page.png)
 ---
 
 ## Customization
