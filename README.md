@@ -1,36 +1,201 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Chat with XLSX & CSV Data: Interactive Data Insights
 
-## Getting Started
+This project enables users to upload `.xlsx` and `.csv` files and interact with the uploaded data through a chat interface. Users can ask questions, get summaries, and derive insights from the data. It features file upload functionality, data rendering with pagination, and a conversational assistant.
 
-First, run the development server:
+---
+
+## Features
+
+1. **File Upload**: Upload `.xlsx` and `.csv` files with intuitive drag-and-drop or click-to-upload functionality.
+2. **Data Display**: View uploaded data with pagination and tab-based navigation for multiple files.
+3. **Chat Functionality**:
+   - Conversational interface to query and analyze uploaded data.
+   - AI-powered assistant for detailed responses.
+   - Dynamic "thinking" or "typing" indicator while the assistant processes queries.
+4. **Dark and Light Mode Compatibility**: Automatically adapts to the user's theme preferences.
+5. **Pagination**: Navigate large datasets easily with next/previous buttons.
+6. **File Management**: Delete specific files or clear all uploaded files at any time.
+
+---
+
+## Tech Stack
+
+- **Frontend**:
+  - **React**: Component-based architecture for seamless UI updates.
+  - **Next.js**: File-based routing and server-side rendering.
+  - **Tailwind CSS**: Responsive design and styling.
+  - **React Dropzone**: Intuitive file upload handling.
+  - **Framer Motion**: Smooth animations for user interactions.
+  - **React Markdown**: Render chat responses with Markdown support.
+- **Backend**:
+  - **API Routes (Next.js)**: Handles AI processing and file parsing.
+  - **AI Integration**: Uses AI APIs (e.g., OpenAI or Gemini) for natural language processing.
+
+---
+
+## Installation
+
+### Prerequisites
+
+- **Node.js**: >=16.x
+- **npm** or **yarn** package manager
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Pawardevelops/doc-ai.git
+cd doc-ai
+```
+
+### Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### Set Up Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# AI Model API Key (e.g., OpenAI or Gemini API)
+GEMINI_API_KEY=your-api-key-here
+
+# AI Model Endpoint (if needed)
+NEXT_PUBLIC_AI_API_ENDPOINT=https://api.example.com
+```
+
+### Start the Development Server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Navigate to `http://localhost:3000` in your browser to see the app.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Folder Structure
 
-## Learn More
+```
+├── public/                  # Static files
+├── src/
+│   ├── app/
+│   │   ├── components/      # Reusable UI components
+│   │   │   ├── ui/          # UI-specific components (FileUpload, FileContent, etc.)
+│   │   ├── api/             # Backend API routes (e.g., /api/chat)
+│   │   └── page.js          # Main page entry
+│   ├── styles/              # Tailwind and global CSS
+├── .env.local               # Environment variables
+├── package.json             # Project dependencies and scripts
+└── README.md                # Project documentation
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1. Upload Files
+- Drag and drop `.xlsx` or `.csv` files into the upload area or click to select files manually.
+- View each file in a dedicated tab, with data rendered in a paginated table.
 
-## Deploy on Vercel
+### 2. Ask Questions
+- Type questions about the uploaded data into the chat input (e.g., "Summarize the data", "What is the total sales?").
+- The AI will analyze the data and provide responses in natural language.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Manage Files
+- Remove individual files using the "Remove" button.
+- Upload additional files as needed.
+- Deleted files will also remove their associated content from the tabs.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Screenshots
+
+### File Upload
+![File Upload](/images/upload.png)
+
+### Chat Interface
+![Chat Interface](/images/chat.png)
+
+### Data Pagination
+![Data Pagination](/images/content.png)
+
+### Page
+![Data Pagination](/images/page.png)
+---
+
+## Customization
+
+### Modify AI Query Behavior
+Edit the `/api/chat.js` file to customize how the AI processes user queries and interacts with uploaded data.
+
+### Styling
+All styles are built with **Tailwind CSS**. To modify colors, fonts, or layouts, update the `tailwind.config.js` or override styles in the `src/styles` folder.
+
+---
+
+## Deployment
+
+1. **Build the Project**:
+
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+
+2. **Start the Production Server**:
+
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
+
+3. **Deploy on Vercel** (recommended):
+   - Commit and push your project to GitHub.
+   - Connect your repository to [Vercel](https://vercel.com/) for seamless deployment.
+
+---
+
+## Future Enhancements
+
+1. **Support for More File Formats**: Add support for `.pdf`, `.docx`, and other formats.
+2. **Advanced Analysis**: Enable graph-based visualizations and deeper insights.
+3. **User Authentication**: Allow users to save their files and queries.
+4. **Multi-language Support**: Localize the interface and AI responses.
+
+---
+
+## Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature-name`.
+3. Commit changes: `git commit -m "Add new feature"`.
+4. Push to the branch: `git push origin feature-name`.
+5. Submit a pull request.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+
+---
+
+## Contact
+
+- **Author**: Sachin Pawar
+- **Email**: pawardevelops@gmail.com
+- **GitHub**: [Your GitHub Profile](https://github.com/Pawardevelops)
+
+---
+
+Happy coding! 🚀

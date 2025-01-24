@@ -2,7 +2,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 function initializeGemini() {
-    const apiKey = "AIzaSyDKhjoJc-LEg5YhwIvX19P-3OcN9LStOyc";
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
         throw new Error("GOOGLE_API_KEY not found in environment variables.");
     }
