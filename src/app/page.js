@@ -19,8 +19,8 @@ export default function Home() {
   const recordsPerPage = 10;
 
   const handleFileChange = (newFiles) => {
-    console.log(newFiles)
-    if(newFiles.length==0){
+    console.log(newFiles);
+    if (newFiles.length == 0) {
       setFileData([]);
     }
     const newFileData = [];
@@ -117,10 +117,6 @@ export default function Home() {
   const renderTable = (data) => {
     if (data.length === 0) return <p>No data available</p>;
 
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = startIndex + recordsPerPage;
-    const paginatedData = data.slice(startIndex, endIndex);
-
     const headers = Object.keys(data[0]);
 
     return (
@@ -139,7 +135,7 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, rowIndex) => (
+            {data.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-gray-50">
                 {headers.map((header, cellIndex) => (
                   <td key={cellIndex} className="border border-gray-300 p-2">
@@ -170,27 +166,27 @@ export default function Home() {
 
         {/* Right Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* File Content Section */}
-        <div className="border border-gray-300 rounded-lg p-4">
+          {/* File Content Section */}
+          <div className="border border-gray-300 rounded-lg p-4">
+            <FileContent
+              className="flex-6"
+              fileData={fileData}
+              renderTable={renderTable}
+              recordsPerPage={10}
+            />
+          </div>
 
-          <FileContent
-            className="flex-6"
-            fileData={fileData}
-            renderTable={renderTable}
-          />
+          {/* Chat Section */}
+          <div className="border border-gray-300 rounded-lg p-4">
+            <ChatSection
+              className="flex-6"
+              chat={chat}
+              loading={loading}
+              setUserQuery={setUserQuery}
+              handleSubmit={handleSubmit}
+            />
+          </div>
         </div>
-
-        {/* Chat Section */}
-        <div className="border border-gray-300 rounded-lg p-4">
-        <ChatSection
-            className="flex-6"
-            chat={chat}
-            loading={loading}
-            setUserQuery={setUserQuery}
-            handleSubmit={handleSubmit}
-          />
-        </div>
-      </div>
       </div>
     </div>
   );

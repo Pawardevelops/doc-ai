@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
-export const FileContent = ({ className, fileData, renderTable }) => {
+export const FileContent = ({ className, fileData, renderTable, recordsPerPage }) => {
   const [activeTab, setActiveTab] = useState(0); // Track the active tab
-    console.log(fileData,"file content")
+  const [currentPage, setCurrentPage] = useState(1); // Track the current page
+
   useEffect(() => {
     // Adjust the activeTab if the current active file is removed
     if (fileData.length === 0) {
@@ -11,6 +12,9 @@ export const FileContent = ({ className, fileData, renderTable }) => {
     } else if (activeTab >= fileData.length) {
       setActiveTab(fileData.length - 1); // Adjust activeTab to the last valid file
     }
+
+    // Reset currentPage when switching tabs
+    setCurrentPage(1);
   }, [fileData, activeTab]);
 
   if (fileData.length === 0) {
@@ -21,11 +25,27 @@ export const FileContent = ({ className, fileData, renderTable }) => {
     );
   }
 
+  // Calculate paginated data for the current tab
+  const currentTabData = fileData[activeTab]?.content || [];
+  const totalPages = Math.ceil(currentTabData.length / recordsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
     <div className={className}>
       <div className="mb-4">
+        {/* Tabs for file selection */}
         <div className="flex gap-2 overflow-x-auto">
-          {/* Render tabs for each file */}
           {fileData.map((file, index) => (
             <button
               key={index}
@@ -41,15 +61,42 @@ export const FileContent = ({ className, fileData, renderTable }) => {
           ))}
         </div>
 
+        {/* Table rendering */}
         <div className="max-h-[400px] overflow-y-auto border border-gray-300 p-4 rounded-lg">
-          {/* Show the content of the active tab only if it exists */}
           {fileData[activeTab] && (
             <>
               <h4 className="font-bold mb-2">{fileData[activeTab].fileName}</h4>
-              {renderTable(fileData[activeTab].content || [])}
+              {renderTable(currentTabData.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage))}
             </>
           )}
         </div>
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center mt-4">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg ${
+                currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white"
+              }`}
+            >
+              Previous
+            </button>
+            <p>
+              Page {currentPage} of {totalPages}
+            </p>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg ${
+                currentPage === totalPages ? "bg-gray-300" : "bg-blue-500 text-white"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
