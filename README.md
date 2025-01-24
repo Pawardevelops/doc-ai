@@ -117,16 +117,16 @@ Navigate to `http://localhost:3000` in your browser to see the app.
 ## Screenshots
 
 ### File Upload
-![File Upload](/images/upload.png)
+![File Upload](/public/images/upload.png)
 
 ### Chat Interface
-![Chat Interface](/images/chat.png)
+![Chat Interface](/public/images/chat.png)
 
 ### Data Pagination
-![Data Pagination](/images/content.png)
+![Data Pagination](/public/images/content.png)
 
 ### Page
-![Data Pagination](/images/page.png)
+![Data Pagination](/public/images/page.png)
 ---
 
 ## Customization
