@@ -2,6 +2,7 @@
 import React from "react";
 import Markdown from "react-markdown";
 import { PlaceholdersAndVanishInput } from "./placeholders-and-vanish-input";
+import { Cover } from "./cover";
 
 export const ChatSection = ({ chat, loading, setUserQuery, handleSubmit }) => {
   return (
@@ -21,28 +22,33 @@ export const ChatSection = ({ chat, loading, setUserQuery, handleSubmit }) => {
             }`}
           >
             {message.type === "ai" ? (
-              loading ? (
-                <p>Loading...</p>
-              ) : (
-                <Markdown>{message.message}</Markdown>
-              )
+              <Markdown>{message.message}</Markdown>
             ) : (
               <p>{message.message}</p>
             )}
-            
           </div>
-          
         </div>
       ))}
+
+      {/* Thinking state for AI */}
+      {loading && (
+        <div className="mb-4 text-left">
+          <div className="inline-block rounded-lg p-4 bg-gray-200 text-black">
+            <Cover>Thinking...</Cover>
+          </div>
+        </div>
+      )}
+
+      {/* Input section */}
       <PlaceholdersAndVanishInput
-            placeholders={[
-              "Ask a question...",
-              "Summarize the data...",
-              "Find insights...",
-            ]}
-            onChange={(e) => setUserQuery(e.target.value)}
-            onSubmit={handleSubmit}
-          />
+        placeholders={[
+          "Ask a question...",
+          "Summarize the data...",
+          "Find insights...",
+        ]}
+        onChange={(e) => setUserQuery(e.target.value)}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

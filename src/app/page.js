@@ -15,6 +15,7 @@ export default function Home() {
   const [chat, setChat] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [chatLoading,setChatLoading] = useState(false)
 
   const recordsPerPage = 10;
 
@@ -69,18 +70,18 @@ export default function Home() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
-
+  
     if (!userQuery.trim()) return;
     if (fileData.length === 0) {
       setError("Please upload at least one file first.");
       return;
     }
-
+  
     const userMessage = { type: "user", message: userQuery };
     setChat((prevChat) => [...prevChat, userMessage]);
     setUserQuery("");
-    setLoading(true);
-
+    setChatLoading(true); // Set loading to true for the thinking state
+  
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -95,12 +96,12 @@ export default function Home() {
           })),
         }),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch response.");
       }
-
+  
       const data = await response.json();
       setChat((prevChat) => [
         ...prevChat,
@@ -110,24 +111,25 @@ export default function Home() {
       console.error("Error:", error);
       setError(error.message);
     } finally {
-      setLoading(false);
+      setChatLoading(false); // Remove the thinking state after response
     }
   };
+  
 
   const renderTable = (data) => {
-    if (data.length === 0) return <p>No data available</p>;
-
+    if (data.length === 0) return <p className="text-gray-600 dark:text-gray-300">No data available</p>;
+  
     const headers = Object.keys(data[0]);
-
+  
     return (
       <div>
-        <table className="w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
+        <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm">
+          <thead className="bg-gray-100 dark:bg-gray-800">
             <tr>
               {headers.map((header, index) => (
                 <th
                   key={index}
-                  className="border border-gray-300 p-2 text-left font-medium"
+                  className="border border-gray-300 dark:border-gray-700 p-2 text-left font-medium text-gray-800 dark:text-gray-200"
                 >
                   {header}
                 </th>
@@ -136,9 +138,15 @@ export default function Home() {
           </thead>
           <tbody>
             {data.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray-50">
+              <tr
+                key={rowIndex}
+                className="hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+              >
                 {headers.map((header, cellIndex) => (
-                  <td key={cellIndex} className="border border-gray-300 p-2">
+                  <td
+                    key={cellIndex}
+                    className="border border-gray-300 dark:border-gray-700 p-2"
+                  >
                     {row[header]}
                   </td>
                 ))}
@@ -149,11 +157,12 @@ export default function Home() {
       </div>
     );
   };
+  
 
   return (
     <div className="p-4 font-sans">
       <div className="text-center text-3xl font-bold text-blue-600 mb-6">
-        Chat With <FlipWords words={["XLSX", "CSV"]} />
+        Chat With <FlipWords words={["XLS", "CSV"]} />
       </div>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -181,7 +190,7 @@ export default function Home() {
             <ChatSection
               className="flex-6"
               chat={chat}
-              loading={loading}
+              loading={chatLoading}
               setUserQuery={setUserQuery}
               handleSubmit={handleSubmit}
             />

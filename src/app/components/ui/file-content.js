@@ -77,8 +77,8 @@ export const FileContent = ({ className, fileData, renderTable, recordsPerPage }
             <button
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
-              className={`px-4 py-2 rounded-lg ${
-                currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white"
+              className={`px-4 py-2 rounded-lg  ${
+                currentPage === 1 ? "bg-gray-300 text-gray-700" : "bg-blue-500 text-white"
               }`}
             >
               Previous
@@ -90,7 +90,7 @@ export const FileContent = ({ className, fileData, renderTable, recordsPerPage }
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
               className={`px-4 py-2 rounded-lg ${
-                currentPage === totalPages ? "bg-gray-300" : "bg-blue-500 text-white"
+                currentPage === totalPages ? "bg-gray-300 text-gray-700" : "bg-blue-500 text-white"
               }`}
             >
               Next
