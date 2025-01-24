@@ -1,13 +1,12 @@
-"use client"
-import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { PlaceholdersAndVanishInput } from "./components/ui/placeholders-and-vanish-input";
+"use client";
+
+import { useState } from "react";
 import { read, utils } from "xlsx";
-import ReactMarkdown from "react-markdown";
 import { FileUpload } from "./components/ui/file-upload";
 import { FlipWords } from "./components/ui/flip-words";
-import { TextGenerateEffect } from "./components/ui/text-generate-effect";
+import { PlaceholdersAndVanishInput } from "./components/ui/placeholders-and-vanish-input";
+import { FileContent } from "./components/ui/file-content";
+import { ChatSection } from "./components/ui/chat-section";
 
 export default function Home() {
   const [fileData, setFileData] = useState([]);
@@ -15,7 +14,7 @@ export default function Home() {
   const [userQuery, setUserQuery] = useState("");
   const [chat, setChat] = useState([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // New state for loading
+  const [loading, setLoading] = useState(false);
 
   const recordsPerPage = 10;
 
@@ -67,17 +66,16 @@ export default function Home() {
     event.preventDefault();
     setError("");
 
-    if (!userQuery.trim()) return; // Prevent empty queries
+    if (!userQuery.trim()) return;
     if (fileData.length === 0) {
       setError("Please upload at least one file first.");
       return;
     }
 
     const userMessage = { type: "user", message: userQuery };
-
-    setChat((prevChat) => [...prevChat, userMessage]); // Add user query instantly
-    setUserQuery(""); // Clear the input
-    setLoading(true); // Set loading state
+    setChat((prevChat) => [...prevChat, userMessage]);
+    setUserQuery("");
+    setLoading(true);
 
     try {
       const response = await fetch("/api/chat", {
@@ -108,7 +106,7 @@ export default function Home() {
       console.error("Error:", error);
       setError(error.message);
     } finally {
-      setLoading(false); // Remove loading state
+      setLoading(false);
     }
   };
 
@@ -123,17 +121,13 @@ export default function Home() {
 
     return (
       <div>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
+        <table className="w-full border-collapse border border-gray-300 text-sm">
+          <thead className="bg-gray-100">
             <tr>
               {headers.map((header, index) => (
                 <th
                   key={index}
-                  style={{
-                    border: "1px solid #ddd",
-                    padding: "8px",
-                    backgroundColor: "#f4f4f4",
-                  }}
+                  className="border border-gray-300 p-2 text-left font-medium"
                 >
                   {header}
                 </th>
@@ -142,12 +136,9 @@ export default function Home() {
           </thead>
           <tbody>
             {paginatedData.map((row, rowIndex) => (
-              <tr key={rowIndex}>
+              <tr key={rowIndex} className="hover:bg-gray-50">
                 {headers.map((header, cellIndex) => (
-                  <td
-                    key={cellIndex}
-                    style={{ border: "1px solid #ddd", padding: "8px" }}
-                  >
+                  <td key={cellIndex} className="border border-gray-300 p-2">
                     {row[header]}
                   </td>
                 ))}
@@ -155,141 +146,48 @@ export default function Home() {
             ))}
           </tbody>
         </table>
-        <div
-          style={{
-            marginTop: "10px",
-            display: "flex",
-            justifyContent: "center",
-            gap: "10px",
-          }}
-        >
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            style={{
-              padding: "5px 10px",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            }}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {Math.ceil(data.length / recordsPerPage)}
-          </span>
-          <button
-            disabled={currentPage === Math.ceil(data.length / recordsPerPage)}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            style={{
-              padding: "5px 10px",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              cursor:
-                currentPage === Math.ceil(data.length / recordsPerPage)
-                  ? "not-allowed"
-                  : "pointer",
-            }}
-          >
-            Next
-          </button>
-        </div>
       </div>
     );
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "3rem",
-          fontWeight: "bold",
-          marginBottom: "20px",
-          wordWrap: "break-word",
-          color: "#007ACC",
-        }}
-      >
+    <div className="p-4 font-sans">
+      <div className="text-center text-3xl font-bold text-blue-600 mb-6">
         Chat With <FlipWords words={["XLSX", "CSV"]} />
       </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <div>
-<div style={{ marginBottom: "20px" }}>
-        <FileUpload onChange={(files) => handleFileChange(files)} />
-        <p style={{ fontStyle: "italic", fontSize: "14px" }}>
-          {fileData.length > 0
-            ? `${fileData.length} file(s) uploaded successfully.`
-            : "No files uploaded yet."}
-        </p>
-        <div
-          style={{
-            maxHeight: "400px",
-            overflowY: "auto",
-            border: "1px solid #ddd",
-            padding: "10px",
-          }}
-        >
-          {fileData.map((file, index) => (
-            <div key={index} style={{ marginBottom: "10px" }}>
-              <h4 style={{ margin: "5px 0" }}>{file.fileName}</h4>
-              {renderTable(file.content)}
-            </div>
-          ))}
+      <div className="">
+        {/* Left Section */}
+        <div className="">
+          <FileUpload onChange={(files) => handleFileChange(files)} />
+        </div>
+
+        {/* Right Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* File Content Section */}
+        <div className="border border-gray-300 rounded-lg p-4">
+
+          <FileContent
+            className="flex-6"
+            fileData={fileData}
+            renderTable={renderTable}
+          />
+        </div>
+
+        {/* Chat Section */}
+        <div className="border border-gray-300 rounded-lg p-4">
+        <ChatSection
+            className="flex-6"
+            chat={chat}
+            loading={loading}
+            setUserQuery={setUserQuery}
+            handleSubmit={handleSubmit}
+          />
         </div>
       </div>
-
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "4px",
-          padding: "10px",
-          maxHeight: "300px",
-          overflowY: "auto",
-          marginBottom: "20px",
-        }}
-      >
-        {chat.map((message, index) => (
-          <div
-            key={index}
-            style={{
-              marginBottom: "10px",
-              textAlign: message.type === "user" ? "right" : "left",
-            }}
-          >
-            <div
-              style={{
-                display: "inline-block",
-                padding: "10px",
-                borderRadius: "10px",
-                backgroundColor: message.type === "user" ? "#4CAF50" : "#ddd",
-                color: message.type === "user" ? "white" : "black",
-              }}
-            >
-              {message.type === "ai" ? (
-                loading ? (
-                  <p>Loading...</p>
-                ) : (
-                  
-                  <TextGenerateEffect words={message.message} />
-                )
-              ) : (
-                <p>{message.message}</p>
-              )}
-            </div>
-          </div>
-        ))}
-        <PlaceholdersAndVanishInput
-        placeholders={["Ask a question...", "Summarize the data...", "Find insights..."]}
-        onChange={(e) => setUserQuery(e.target.value)}
-        onSubmit={handleSubmit}
-      />
       </div>
-      </div>
-
-      
-      
     </div>
   );
 }
