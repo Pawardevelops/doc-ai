@@ -19,6 +19,10 @@ export default function Home() {
   const recordsPerPage = 10;
 
   const handleFileChange = (newFiles) => {
+    console.log(newFiles)
+    if(newFiles.length==0){
+      setFileData([]);
+    }
     const newFileData = [];
     newFiles.forEach((file) => {
       const reader = new FileReader();
@@ -48,7 +52,7 @@ export default function Home() {
         newFileData.push({ fileName: file.name, content: parsedData });
 
         if (newFileData.length === newFiles.length) {
-          setFileData((prevData) => [...prevData, ...newFileData]);
+          setFileData((prevData) => [...newFileData]);
           setChat([]);
           setCurrentPage(1);
         }
